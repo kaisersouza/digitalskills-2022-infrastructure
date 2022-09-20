@@ -1,0 +1,11 @@
+10.10.10.100    install-server-1.dtd install-server-1
+10.10.10.101    k8s-master1-1.dtd k8s-master1-1
+10.10.10.102    k8s-master1-2.dtd k8s-master1-2
+10.10.10.103    k8s-worker1-1.dtd k8s-worker1-1
+10.10.10.104    k8s-worker1-2.dtd k8s-worker1-2
+10.10.20.200    install-server-2.dtd install-server-2
+10.10.20.201    k8s-master2-1.dtd k8s-master2-1
+10.10.20.202    k8s-master2-2.dtd k8s-master2-2
+10.10.20.203    k8s-worker2-1.dtd k8s-worker2-1
+10.10.20.204    k8s-worker2-2.dtd k8s-worker2-2
+

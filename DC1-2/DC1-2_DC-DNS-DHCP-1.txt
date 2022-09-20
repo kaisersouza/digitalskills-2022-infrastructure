@@ -1,0 +1,69 @@
+OS: Alt Server 10-0
+
+1. Установка DC1-2, DNS, DHCP Failover (minimum 2GB RAM)
+
+1.1) Подготовка системы DC1 к установке домена
+cat <<EOF > /etc/hosts
+10.10.10.215    dc1.test.company
+10.10.10.216    dc2.test.company
+EOF
+
+echo 'CONFIG_IPV6=yes' >> /etc/net/ifaces/*/options
+ifdown-ifup
+
+1.2) Установка пакетов
+apt-get update -y
+apt-get dist-upgrade
+apt-get install freeipa-server freeipa-server-dns alterator-auth
+
+1.3) Инициализация FreeIPA контроллера домена DC1
+Удаляем действующий DNS сервер из resolv.conf, так как FreeIPA не даст создать зону, если найдет такую же на ns-серверах
+
+ipa-server-install -U --hostname=$(hostname) -r COMPANY.LOCAL -n company.local -p 12345678 -a 12345678 --setup-dns --forwarder 78.37.77.77 --no-reverse
+
+
+2. Установка DC2, DNS, DHCP Failover (minimum 2GB RAM) Replica
+
+2.1) Подготовка системы DC1 к установке домена
+cat <<EOF > /etc/hosts
+10.10.10.215    dc1.test.company
+10.10.10.216    dc2.test.company
+EOF
+
+echo 'CONFIG_IPV6=yes' >> /etc/net/ifaces/*/options
+ifdown-ifup
+
+1.2) Установка пакетов
+apt-get update -y
+apt-get dist-upgrade
+apt-get install freeipa-client freeipa-server-dns
+
+2.3) Инициализация FreeIPA реплики DC2
+На DC1:
+    Авторизуемся в Kerberos
+    kinit admin
+    ipa host-add dc2.test.company --random --ip-address=10.10.10.216 Получаем random password
+    ipa hostgroup-add-member ipaservers --hosts dc2.test.company
+
+На DC2:
+    echo 'nameserver 10.10.10.215' > /etc/net/ifaces/ens19/resolv.conf
+
+    указать службе resolvconf использовать DNS FreeIPA и домен для поиска. Для этого в файле /etc/resolvconf.conf добавить/отредактировать следующие параметры
+    interface_order='lo lo[0-9]* lo.* eth0'
+    search_domains=example.test
+    # resolvconf -u
+
+    ipa-replica-install --password='8MqXv2z5SZkPNRVRMiuZH4p' --setup-dns --forwarder=78.37.77.77
+    ipa-ca-install
+
+Keepalive:
+На DC1-2
+echo 'listen-on { 10.10.10.0/24; };' >> /etc/bind/ipa-options-ext.conf
+systemctl restart bind
+Ставим keepalive на оба сервера
+
+
+
+
+
+

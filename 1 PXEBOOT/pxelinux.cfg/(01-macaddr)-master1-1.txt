@@ -1,0 +1,24 @@
+default local
+display pxelinux.cfg/default.msg
+timeout 100
+prompt 1
+ONTIMEOUT ftp
+
+label local
+  localboot 0
+
+label ftp
+  kernel syslinux/alt0/vmlinuz
+  append initrd=syslinux/alt0/full.cz changedisk fastboot  ramdisk_size=347909 showopts vga=normal quiet splash automatic=method:ftp,network:dhcp,server:10.10.10.100,directory:/netinst/mnt/ tz=Europe/Moscow  lang=ru_RU ai curl=ftp://10.10.10.100/101/metadata/
+
+label nfs
+  kernel syslinux/alt0/vmlinuz
+  append initrd=syslinux/alt0/full.cz changedisk fastboot  ramdisk_size=347909 showopts vga=normal quiet splash automatic=method:nfs,network:dhcp tz=Europe/Moscow  lang=ru_RU
+
+label http
+  kernel syslinux/alt0/vmlinuz
+  append initrd=syslinux/alt0/full.cz changedisk fastboot  ramdisk_size=347909 showopts vga=normal quiet splash automatic=method:http,network:dhcp,server:192.168.1.1,directory:/ tz=Europe/Moscow  lang=ru_RU
+
+label memtest
+  linux memtest.bin
+
